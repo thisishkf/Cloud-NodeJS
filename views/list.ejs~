@@ -1,0 +1,25 @@
+<html>
+    <head> 
+        <title>Restaurant List</title>
+	<link rel="stylesheet" type="text/css" href="http://www.w3schools.com/lib/w3.css">
+        <script>function goBack() {window.history.back();}</script>
+    </head>
+    <body>
+		<div class="w3-container w3-teal">
+			<h2>User: <%=user%></h2>
+			<h2>Showing <%=res.length%> documents (criteria: <%=criteria%>)</h2>
+			<a href="/logout">Logout</a>
+			<a href="/">Home</a>
+		</div>
+
+		<ol>
+		<% for(i=0;i<res.length;i++) { %>
+		<li><a href="/detail?id=<%=res[i]._id%>"><%=res[i].name%></a></li>
+		<% } %>
+		</ol>
+    </body>
+<footer>
+<hr/>
+Owned by Ho Kin Fai & Wong Chun Fai
+</footer>
+</html>

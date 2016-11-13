@@ -1,0 +1,19 @@
+{
+	"name": "Sam",
+	"description": "COMPS381F-GroupProject",
+	"version": "0.0.1",
+	"dependencies": {
+		"mongodb": "latest",
+		"express": "latest",
+		"express-fileupload": "latest",
+		"express": "latest",
+		"cookie-session": "latest",
+		"ejs": "*",
+		"body-parser": "latest"
+	},
+	"scripts" : {
+		"start": "node server.js"
+	},
+	"engine": "*"
+}
+

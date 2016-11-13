@@ -1,0 +1,53 @@
+<html>
+    <head> 
+        <title>Detail</title>
+	<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+	<script>function goBack() {window.history.back();}</script>
+    </head>
+    <body>
+
+<div class="w3-container w3-teal">
+	<h1><%=rest.name%></h1>
+	<a href="/logout">Logout</a>
+	<a href="/new">New</a>
+	<a href="/">Home</a>
+</div>
+<% if(rest.data!=''){ %>
+	<img src="data:<%=rest.mimetype%>;base64,<%=rest.data%>"/>
+<%}%>
+<ul>
+	<li>Borough: <%=rest.borough%></li>
+	<li>Cuisine: <%=rest.cuisine%></li>
+	<li>Street: <%=rest.street%></li>
+	<li>Building: <%=rest.building%></li>
+	<li>Zipcode: <%=rest.zipcode%></li>
+	<li>GPS:[<%=rest.coor%>]</li>
+	<li>Rating</li>
+	<ol><%var i=0;%>
+		<% if (rest.rate != null){ %>
+		<%for(i=0;i<rest.rate.length;i++){%>
+			<li><%=rest.rate[i].score%> (<%=rest.rate[i].owner%>)</li>
+		<%}}%>
+	</ol>
+	<li>Created by <%=rest.owner%></li>
+</ul>
+<a href="gmap?lat=<%=rest.coor[1]%>&lon=<%=rest.coor[0]%>&title=<%=rest.name%>">Google Map</a>
+
+<div class="w3-container">
+<a href="/rate?id=<%=rest._id%>" style="text-decoration: none">
+    <button class="w3-btn w3-section w3-teal w3-ripple">Rate</button>
+</a>
+<a href="/change?id=<%=rest._id%>" style="text-decoration: none">
+  <button class="w3-btn w3-section w3-teal w3-ripple">Edit</button>
+</a>
+<a href="/remove?id=<%=rest._id%>" style="text-decoration: none">
+  <button class="w3-btn w3-section w3-teal w3-ripple">Delete</button>
+</a>
+<button class="w3-btn w3-section w3-teal w3-ripple" onclick="goBack()">Go Back</button>
+</div>
+    </body>
+<footer>
+<hr/>
+Owned by Ho Kin Fai & Wong Chun Fai
+</footer>
+</html>

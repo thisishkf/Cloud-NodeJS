@@ -1,0 +1,66 @@
+<html>
+
+<head>
+	<title>Create New Restaurant | 381 Project</title>
+	<link rel="stylesheet" type="text/css" href="layout.css">
+<link rel="stylesheet" type="text/css" href="http://www.w3schools.com/lib/w3.css">
+
+</head>
+
+<body>
+	<div class="w3-container w3-teal">
+		<h2>Create New Restaurant</h2>
+		<a href="/logout">Logout</a>
+		<a href="/new">New</a>
+		<a href="/">Home</a>
+	</div>
+
+	<form action="/create" method="Post" encType="multipart/form-data" class="w3-container" style="width:100%">
+	<p>
+		<input class="w3-input" type="text" name="name" id="name" required/>
+		<label class="w3-label w3-validate" for="name">Name</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="borough" id="borough">
+		<label class="w3-label w3-validate" for="borough">Borough</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="cuisine" id="cuisine"/>
+		<label class="w3-label w3-validate" for="cuisine">Cuisine</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="street" id="street"/>
+		<label class="w3-label w3-validate" for="street">Street</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="building" id="building"/>
+		<label class="w3-label w3-validate" for="building">Building</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="zipcode" id="zipcode"/>
+		<label class="w3-label w3-validate" for="zipcode">Zipcode</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="lon" id="lon"/>
+		<label class="w3-label w3-validate" for="lon">GPS Corrdinates (lon.)</label>
+	</p>
+	<p>
+		<input class="w3-input" type="text" name="lat" id="lat"/>
+		<label class="w3-label w3-validate" for="lat">GPS Corrdinates (lat.)</label>
+	</p>
+	<p>
+		<input class="w3-input" type="file" name="sampleFile" id="photo"/>
+		<label class="w3-label w3-validate" for="photo">Photo</label>
+	</p>
+	<p>
+		<input type="Submit" value="Create"/>
+	</p>
+	</form>
+</body>
+
+	<footer>
+		<hr/>
+		Owned by Ho Kin Fai & Wong Chun Fai
+	</footer>
+
+</html>
