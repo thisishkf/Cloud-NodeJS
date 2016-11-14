@@ -266,7 +266,8 @@ app.get('/rate',function(req,res) {
 app.post('/rate',function(req,res) {
 	MongoClient.connect(mongourl,function(err,db) {
 		assert.equal(err,null);
-		checkRate(db,req.session.username,function(result) {
+console.log(req.body.id);
+		checkRate(db,req.body.id,req.session.username,function(result) {
 			if(result !=null){
 				res.sendFile(__dirname + '/public/error.html');
 			}
@@ -284,7 +285,7 @@ app.post('/rate',function(req,res) {
 
 function addRate(db,resID,resScore,rateOwner,callback) {
 	db.collection('res').update(
-		{"id" : resID},
+		{"_id" : resID,},
 		{$push:
 			{rate: {score :resScore,
 				owner:rateOwner}
@@ -300,9 +301,10 @@ function addRate(db,resID,resScore,rateOwner,callback) {
 	);//end insertOne
 }//end addRate
 
-function checkRate(db,owner,callback) {
+function checkRate(db,resID,owner,callback) {
+//"id": ObjectId(resID)
 		console.log(owner);
-		db.collection('res').findOne({ "result": { $elemMatch: { "rate.owner": owner } } },function(err,result) {
+		db.collection('res').findOne({"_id" : ObjectId(resID), "rate": { $elemMatch: { "owner": owner } } },function(err,result) {
 			assert.equal(err,null);
 			callback(result);
 			console.log(result);
