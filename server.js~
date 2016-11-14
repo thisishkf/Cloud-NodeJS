@@ -1,7 +1,9 @@
-/*****************************************************************
-**	Author: 	Ho Kin Fai, Wong Chun Fai		**
-**	Last Modified:	22-10-2016 11:50			**
-*****************************************************************/
+/*************************************************************************
+**	Author		: 	Ho Kin Fai, Wong Chun Fai		**
+**	Last Modified	:	28-11-2016 11:50			**
+**	Version		:	0.1.3/sam				**
+**	Changes		:	apiCreate				**
+*************************************************************************/
 
 var http = require('http');
 var url  = require('url');
@@ -37,16 +39,24 @@ app.post('/login',function(req,res) {
 	var user = req.body.name;
 	var pw = req.body.pw;	
 	var criteria = {"name" : user};
-	MongoClient.connect(mongourl,function(err,db) {
-		assert.equal(err,null);
-		findUser(db,criteria,function(result){
-			if(result.name == user && result.password == pw){
-				req.session.authenticated = true;
-				req.session.username = req.body.name;
-			}
-			res.redirect('/');
+	if(req.body.name != ''){ //no input
+		MongoClient.connect(mongourl,function(err,db) {
+			assert.equal(err,null);
+			findUser(db,criteria,function(result){
+				if(result == null){
+					res.sendFile(__dirname + '/public/error.html');
+				}//no user
+				else if(result.name == user && result.password == pw){
+					req.session.authenticated = true;
+					req.session.username = req.body.name;
+					res.redirect('/');
+				}
+
+			});
 		});
-	});
+	}else{
+		res.sendFile(__dirname + '/public/error.html');
+	}
 });
 
 function findUser(db,criteria,callback) {
@@ -82,6 +92,30 @@ app.get('/read', function(req,res) {
 	}//end authendication
 });
 
+//api/read
+app.get('/api/read/:field/:value', function(req,res) {
+	if (!req.session.authenticated) {
+		res.sendFile(__dirname + '/public/login.html');
+	}
+	else{
+ 		MongoClient.connect(mongourl,function(err,db) {
+			assert.equal(err,null);	
+		var field = req.params.field;
+		var value = req.params.value;
+		var criteria;
+		if (field == "name")
+			criteria = { "name" : value };
+		if (field == "borough")
+			criteria = { "borough" : value };
+		if (field == "cuisine")
+			criteria = { "cuisine" : value };
+			findRestaurant(db,criteria,function(dbres) {
+				db.close();
+				res.end(JSON.stringify(dbres));
+			});
+		});
+	}//end authendication
+});
 function findRestaurant(db,criteria,callback) {
 		var dbres = [];
 		db.collection('res').find(criteria,function(err,result) {
@@ -154,16 +188,16 @@ app.post('/change', function(req, res) {
 	assert.equal(null,err);
 		checkName(db,req.body.name,function(result) {
 			if(result ==null){
-			commitChange(db,req.body.id, req.body.name, req.body.borough, req.body.cuisine, req.body.street, req.body.building, req.body.zipcode, req.body.lon, req.body.lat, req.files.sampleFile,
+				res.sendFile(__dirname + '/public/error.html');
+			}
+			else{	
+				commitChange(db,req.body.id, req.body.name, req.body.borough, req.body.cuisine, req.body.street, req.body.building, req.body.zipcode, req.body.lon, req.body.lat, req.files.sampleFile,
 				function(result) {
 			 		db.close();
 					res.status(200);
 					res.redirect('/detail?id=' + req.body.id);
 				}//end function(result) 
 			);//end commitChange
-			}
-			else{
-				res.sendFile(__dirname + '/public/error.html');
 			}
 		});//end checkName
 	});//end Mongo connect
@@ -177,6 +211,7 @@ function commitChange(db,id,name,borough,cuisine,street,building,zipcode,lon,lat
 	 	"cuisine" : cuisine,
 		"street" : street,
 		"building" : building,
+		"zipcode" : zipcode,
 		"coor" : [lon,lat],
 		"data" : new Buffer(bfile.data).toString('base64'),
 		"mimetype" : bfile.mimetype
@@ -196,6 +231,7 @@ function commitChange(db,id,name,borough,cuisine,street,building,zipcode,lon,lat
 	 	"cuisine" : cuisine,
 		"street" : street,
 		"building" : building,
+		"zipcode" : zipcode,
 		"coor" : [lon,lat]
 		}}, 
 			function(err,result) {
@@ -207,7 +243,7 @@ function commitChange(db,id,name,borough,cuisine,street,building,zipcode,lon,lat
 			}// end function(err,result)
 		);//end insertOne
 	}//end if else of empty photo
-}//end create
+}//end change
 
 function checkName(db,target,callback) {
 	db.collection('res').findOne({"name": target},function(err,result) {
@@ -230,12 +266,19 @@ app.get('/rate',function(req,res) {
 app.post('/rate',function(req,res) {
 	MongoClient.connect(mongourl,function(err,db) {
 		assert.equal(err,null);
-		addRate(db,req.body.id,req.body.score,req.session.username,
-			function(result) {
-				  db.close();
-				  res.redirect('/read');
-			}//end function(result) 
-		);//end addRate
+		checkRate(db,req.session.username,function(result) {
+			if(result !=null){
+				res.sendFile(__dirname + '/public/error.html');
+			}
+			else{	
+				addRate(db,req.body.id,req.body.score,req.session.username,
+					function(result) {
+						  db.close();
+						  res.redirect('/read');
+					}//end function(result) 
+				);//end addRate
+			}
+		});//end checkRate
       });//end Mongo connect
 });//end post
 
@@ -257,6 +300,15 @@ function addRate(db,resID,resScore,rateOwner,callback) {
 	);//end insertOne
 }//end addRate
 
+function checkRate(db,owner,callback) {
+		console.log(owner);
+		db.collection('res').findOne({ "result": { $elemMatch: { "rate.owner": owner } } },function(err,result) {
+			assert.equal(err,null);
+			callback(result);
+			console.log(result);
+		}//end function(err,result) {
+	);//end find
+}
 /*************************Showing map***************************/
 app.get('/gmap',function(req,res) {
 	if (!req.session.authenticated) {
@@ -278,6 +330,7 @@ app.get('/new',function(req,res) {
 });
 
 app.post('/create', function(req, res) {
+	var sampleFile;
 	var criteria = {"name" : req.body.name};
 	MongoClient.connect(mongourl,function(err,db) {
 		assert.equal(null,err);
@@ -302,6 +355,8 @@ app.post('/create', function(req, res) {
 		});//end findOneRestaurant
 	});//end Mongo connect
 });//end post
+
+
 
 function create(db,owner,name,borough,cuisine,street,building,zipcode,lon,lat,bfile,callback) {
 	db.collection('res').insertOne({
@@ -328,6 +383,8 @@ function create(db,owner,name,borough,cuisine,street,building,zipcode,lon,lat,bf
 	);//end insertOne
 }//end create
 
+
+
 function findOneRestaurant(db,criteria,callback) {
 		db.collection('res').findOne(criteria,function(err,result) {
 			assert.equal(err,null);
@@ -346,10 +403,7 @@ app.get('/remove', function(req, res,callback) {
 			deleteRes(db,req.query.id,req.session.username,
 				function(result) {
 					db.close();
-					if(result.result.n ==1)
-						res.redirect('/');
-					else
-						res.sendFile(__dirname + '/public/error.html'); 
+						res.sendFile(__dirname + '/public/finish.html');
 				}//end function(result) 
 			);//end deleteRes
 		});//end Mongo connect
@@ -401,6 +455,59 @@ function createUser(db,name,pw,callback) {
 		}// end function(err,result)
 	);//end insertOne
 }//end create
+
+
+//--------------------------------------API----------------
+app.post('/api/create', function(req, res) {
+	var criteria = {"name" : req.body.name};
+	console.log(req.body.address);
+		MongoClient.connect(mongourl,function(err,db) {
+			assert.equal(null,err);
+			findOneRestaurant(db,criteria,function(dbres) {
+				if(dbres == null){
+					APIcreate1(db, req.session.username, req.body.name, req.body.address.borough, req.body.address.cuisine, req.body.address.street, req.body.address.building, req.body.address.zipcode, req.body.address.lon, req.body.address.lat,
+						function(result) {
+							db.close();
+							if (result.insertedId != null) {
+								res.end(JSON.parse('"{status: OK, _id: ' + result.insertedId + '}"'));
+					  		} else {
+								res.end(JSON.parse('"{status: fail}"'));
+							}
+						}//end function(result) 
+					);//end create
+				}
+				else{
+					res.sendFile(__dirname + '/public/error.html');
+				}//end else
+			});//end findOneRestaurant
+		});//end Mongo connect
+});//end post
+
+
+
+function APIcreate1(db,owner,name,borough,cuisine,street,building,zipcode,lon,lat,callback) {
+	db.collection('res').insertOne({
+	"owner" : owner,
+	"borough" : borough,
+	"name" : name,
+ 	"cuisine" : cuisine,
+	"street" : street,
+	"building" : building,
+	"coor" : [lon,lat],
+	}, 
+		function(err,result) {
+			if (err) {
+				result = err;
+				console.log("insertOne error: " + JSON.stringify(err));
+			} else {
+		  		console.log("status : OK,");
+				console.log("_id : " + result.insertedId);
+			}
+			callback(result);
+		}// end function(err,result)
+	);//end insertOne
+}//end create
+
 
 app.listen(8099, function() {
   console.log('Server is waiting for incoming requests...');
