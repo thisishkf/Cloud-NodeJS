@@ -9,10 +9,9 @@
 <div class="w3-container w3-teal">
 	<h1><%=rest.name%></h1>
 	<a href="/logout">Logout</a>
-	<a href="/new">New</a>
 	<a href="/">Home</a>
 </div>
-<% if(rest.data!=''){ %>
+<% if(rest.data!=''|| rest.mimetype != "application/pdf"){ %>
 	<img src="data:<%=rest.mimetype%>;base64,<%=rest.data%>"/>
 <%}%>
 <ul>

@@ -94,10 +94,7 @@ app.get('/read', function(req,res) {
 
 //api/read
 app.get('/api/read/:field/:value', function(req,res) {
-	if (!req.session.authenticated) {
-		res.sendFile(__dirname + '/public/login.html');
-	}
-	else{
+
  		MongoClient.connect(mongourl,function(err,db) {
 			assert.equal(err,null);	
 		var field = req.params.field;
@@ -114,7 +111,6 @@ app.get('/api/read/:field/:value', function(req,res) {
 				res.end(JSON.stringify(dbres));
 			});
 		});
-	}//end authendication
 });
 function findRestaurant(db,criteria,callback) {
 		var dbres = [];
@@ -141,6 +137,7 @@ app.get('/detail', function(req,res) {
 		MongoClient.connect(mongourl,function(err,db) {
 			assert.equal(err,null);
 			findDetail(db,target,function(dbres) {
+				console.log(dbres.mimetype);
 				db.close();
 				res.render('showOne.ejs',{rest:dbres});
 			});
@@ -317,7 +314,7 @@ app.get('/gmap',function(req,res) {
 		res.sendFile(__dirname + '/public/login.html');
 	}
 	else{
-		res.render("map.ejs",{lat:req.query.lat,lon:req.query.lon,title:req.query.title});
+		res.render("map.ejs",{lat:req.query.lat,lon:req.query.lon});
 	}
 });
 
@@ -336,8 +333,8 @@ app.post('/create', function(req, res) {
 	var criteria = {"name" : req.body.name};
 	MongoClient.connect(mongourl,function(err,db) {
 		assert.equal(null,err);
-		findOneRestaurant(db,criteria,function(dbres) {
-			if(dbres == null){
+		findOneRestaurant(db,criteria,function(dbres) { //hihihi
+			if(dbres == null || req.files.sampleFile.minetype =="application/pdf"){
 				create(db, req.session.username, req.body.name, req.body.borough, req.body.cuisine, req.body.street, req.body.building, req.body.zipcode, req.body.lon, req.body.lat, req.files.sampleFile,
 					function(result) {
 						db.close();
@@ -462,12 +459,12 @@ function createUser(db,name,pw,callback) {
 //--------------------------------------API----------------
 app.post('/api/create', function(req, res) {
 	var criteria = {"name" : req.body.name};
-	console.log(req.body.address);
+		console.log(req.body.address);
 		MongoClient.connect(mongourl,function(err,db) {
 			assert.equal(null,err);
 			findOneRestaurant(db,criteria,function(dbres) {
 				if(dbres == null){
-					APIcreate1(db, req.session.username, req.body.name, req.body.address.borough, req.body.address.cuisine, req.body.address.street, req.body.address.building, req.body.address.zipcode, req.body.address.lon, req.body.address.lat,
+					APIcreate1(db, req.session.username, req.body.name, req.body.borough, req.body.cuisine, req.body.street, req.body.building, req.body.zipcode, req.body.lon, req.body.lat,
 						function(result) {
 							db.close();
 							if (result.insertedId != null) {
