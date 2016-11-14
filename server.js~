@@ -464,7 +464,7 @@ app.post('/api/create', function(req, res) {
 			assert.equal(null,err);
 			findOneRestaurant(db,criteria,function(dbres) {
 				if(dbres == null){
-					APIcreate1(db, req.session.username, req.body.name, req.body.address.borough, req.body.address.cuisine, req.body.address.street, req.body.address.building, req.body.address.zipcode, req.body.address.lon, req.body.address.lat,
+					APIcreate1(db, req.session.username, req.body.name, req.body.borough, req.body.cuisine, req.body.street, req.body.building, req.body.zipcode, req.body.lon, req.body.lat,
 						function(result) {
 							db.close();
 							if (result.insertedId != null) {
