@@ -11,7 +11,7 @@
 	<a href="/logout">Logout</a>
 	<a href="/">Home</a>
 </div>
-<% if(rest.data!=''|| rest.mimetype != "application/pdf"){ %>
+<% if(rest.data!='' &&rest.mimetype != "application/pdf" && rest.mimetype != udefined){ %>
 	<img src="data:<%=rest.mimetype%>;base64,<%=rest.data%>"/>
 <%}%>
 <ul>
